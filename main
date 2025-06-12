@@ -1,0 +1,229 @@
+-- LocalScript | Otomatik Coin Toplayıcı GUI
+local player = game.Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local humanoidRootPart = char:WaitForChild("HumanoidRootPart")
+local runService = game:GetService("RunService")
+local workspace = game:GetService("Workspace")
+
+-- === GUI OLUŞTURMA ===
+local screenGui = Instance.new("ScreenGui")
+screenGui.Name = "CoinFarmGUI"
+screenGui.Parent = player:WaitForChild("PlayerGui")
+screenGui.ResetOnSpawn = false
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 280, 0, 170)
+mainFrame.Position = UDim2.new(0.5, -140, 0.65, 0)
+mainFrame.BackgroundTransparency = 0.3
+mainFrame.BackgroundColor3 = Color3.fromRGB(44, 62, 80)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = screenGui
+
+local uiCorner = Instance.new("UICorner")
+uiCorner.CornerRadius = UDim.new(0, 16)
+uiCorner.Parent = mainFrame
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 32)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundTransparency = 1
+title.Text = "Coin Toplama Menüsü"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+title.TextColor3 = Color3.fromRGB(0, 255, 255)
+title.Parent = mainFrame
+
+-- Parlayan "made by 847"
+local madeBy = Instance.new("TextLabel")
+madeBy.Size = UDim2.new(1, 0, 0, 28)
+madeBy.Position = UDim2.new(0, 0, 1, -28)
+madeBy.BackgroundTransparency = 1
+madeBy.Text = "made by 847"
+madeBy.Font = Enum.Font.GothamBlack
+madeBy.TextSize = 19
+madeBy.TextColor3 = Color3.fromRGB(255, 105, 180)
+madeBy.TextStrokeTransparency = 0.4
+madeBy.Parent = mainFrame
+
+-- Parlama efekti
+spawn(function()
+    while true do
+        for i = 0,1,0.02 do
+            madeBy.TextColor3 = Color3.fromHSV(i,1,1)
+            wait(0.02)
+        end
+    end
+end)
+
+-- Aç/Kapa butonu
+local toggleButton = Instance.new("TextButton")
+toggleButton.Size = UDim2.new(0, 160, 0, 40)
+toggleButton.Position = UDim2.new(0.5, -80, 0, 50)
+toggleButton.BackgroundColor3 = Color3.fromRGB(45, 200, 150)
+toggleButton.BackgroundTransparency = 0.08
+toggleButton.Font = Enum.Font.GothamBold
+toggleButton.TextColor3 = Color3.fromRGB(255,255,255)
+toggleButton.TextSize = 20
+toggleButton.Text = "Oto Coin: Kapalı"
+toggleButton.Parent = mainFrame
+toggleButton.AutoButtonColor = true
+
+local toggleCorner = Instance.new("UICorner")
+toggleCorner.CornerRadius = UDim.new(0, 14)
+toggleCorner.Parent = toggleButton
+
+-- Menü aç/kapa
+local menuButton = Instance.new("TextButton")
+menuButton.Size = UDim2.new(0, 36, 0, 36)
+menuButton.Position = UDim2.new(1, -42, 0, 6)
+menuButton.BackgroundColor3 = Color3.fromRGB(220, 255, 200)
+menuButton.BackgroundTransparency = 0.2
+menuButton.Text = "+"
+menuButton.Font = Enum.Font.GothamBlack
+menuButton.TextSize = 24
+menuButton.TextColor3 = Color3.fromRGB(44, 62, 80)
+menuButton.Parent = mainFrame
+menuButton.AutoButtonColor = true
+
+local menuCorner = Instance.new("UICorner")
+menuCorner.CornerRadius = UDim.new(1, 0)
+menuCorner.Parent = menuButton
+
+-- Şeffaflık ve renk animasyonu
+spawn(function()
+    while true do
+        for i = 0.3,0.45,0.01 do
+            mainFrame.BackgroundTransparency = i
+            wait(0.03)
+        end
+        for i = 0.45,0.3,-0.01 do
+            mainFrame.BackgroundTransparency = i
+            wait(0.03)
+        end
+    end
+end)
+
+-- Sürükleme desteği (mobil uyumlu)
+local UIS = game:GetService("UserInputService")
+local dragging, dragInput, dragStart, startPos
+mainFrame.InputBegan:Connect(function(input)
+    if (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then
+        dragging = true
+        dragStart = input.Position
+        startPos = mainFrame.Position
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then dragging = false end
+        end)
+    end
+end)
+mainFrame.InputChanged:Connect(function(input)
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+        local delta = input.Position - dragStart
+        mainFrame.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- Menü gizleme/gösterme
+local menuOpen = true
+menuButton.MouseButton1Click:Connect(function()
+    menuOpen = not menuOpen
+    if menuOpen then
+        for _,v in pairs(mainFrame:GetChildren()) do
+            if v ~= menuButton then v.Visible = true end
+        end
+        menuButton.Text = "-"
+    else
+        for _,v in pairs(mainFrame:GetChildren()) do
+            if v ~= menuButton then v.Visible = false end
+        end
+        menuButton.Text = "+"
+    end
+end)
+menuButton.Text = "-"
+
+-- === COIN FARM LOGİĞİ ===
+local farmActive = false
+toggleButton.MouseButton1Click:Connect(function()
+    farmActive = not farmActive
+    if farmActive then
+        toggleButton.Text = "Oto Coin: Açık"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(10, 180, 60)
+    else
+        toggleButton.Text = "Oto Coin: Kapalı"
+        toggleButton.BackgroundColor3 = Color3.fromRGB(45, 200, 150)
+    end
+end)
+
+-- Coin isimleri (farklı oyunlarda uyarlayabilmek için)
+local coinNames = {"Coin", "Coins", "Collectible"}
+
+-- Güvenli coin toplama fonksiyonu
+function findCoins()
+    local coins = {}
+    for _, name in ipairs(coinNames) do
+        local folder = workspace:FindFirstChild(name)
+        if folder then
+            for _, coin in ipairs(folder:GetChildren()) do
+                table.insert(coins, coin)
+            end
+        end
+        for _, obj in ipairs(workspace:GetChildren()) do
+            if obj.Name == name then
+                table.insert(coins, obj)
+            end
+        end
+    end
+    return coins
+end
+
+function safeMoveTo(coin)
+    -- 1) Görünmezlik ve hız
+    local char = player.Character
+    if not char then return end
+    local humanoid = char:FindFirstChildOfClass("Humanoid")
+    if not humanoid then return end
+    -- Görünmez yap
+    for _,v in pairs(char:GetChildren()) do
+        if v:IsA("BasePart") then v.Transparency = 0.85 end
+        if v:IsA("Decal") then v.Transparency = 1 end
+    end
+    -- Hız artır
+    local oldWalk = humanoid.WalkSpeed
+    humanoid.WalkSpeed = 55
+    -- Adım adım yaklaş ve coin'e dokun
+    local steps = 15
+    local startPos = humanoidRootPart.Position
+    local endPos = coin.Position + Vector3.new(0,2,0)
+    for i=1,steps do
+        local alpha = i/steps
+        humanoidRootPart.CFrame = CFrame.new(startPos:Lerp(endPos, alpha))
+        wait(0.04)
+    end
+    wait(0.1)
+    -- Eski hıza ve görünürlüğe dön
+    humanoid.WalkSpeed = oldWalk
+    for _,v in pairs(char:GetChildren()) do
+        if v:IsA("BasePart") then v.Transparency = 0 end
+        if v:IsA("Decal") then v.Transparency = 0 end
+    end
+end
+
+-- Ana döngü
+spawn(function()
+    while true do
+        if farmActive then
+            local coins = findCoins()
+            if #coins > 0 then
+                safeMoveTo(coins[1])
+            end
+        end
+        wait(0.3)
+    end
+end)
