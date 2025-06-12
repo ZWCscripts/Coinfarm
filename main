@@ -1,18 +1,22 @@
--- Modern Mobil&PC Menü + Yürüyerek Coin Farm (Auto-Farm) | made by 847
-local player = game.Players.LocalPlayer
-local ws = game:GetService("Workspace")
-local PathfindingService = game:GetService("PathfindingService")
+-- Universal Aimbot + ESP + Modern Sürüklenebilir Menü | made by 847
+-- LocalScript olarak kullan!
 
--- GUI Kurulumu
+local player = game.Players.LocalPlayer
+local mouse = player:GetMouse()
+local uis = game:GetService("UserInputService")
+local runService = game:GetService("RunService")
+local camera = workspace.CurrentCamera
+
+--// GUI Setup
 local gui = Instance.new("ScreenGui")
+gui.Name = "AimbotESPMenu847"
 gui.Parent = player:WaitForChild("PlayerGui")
-gui.Name = "ModernMenu847"
 gui.ResetOnSpawn = false
 
 local main = Instance.new("Frame")
-main.Size = UDim2.new(0, 220, 0, 140)
-main.Position = UDim2.new(0.5, -110, 0.65, 0)
-main.BackgroundColor3 = Color3.fromRGB(30,32,36)
+main.Size = UDim2.new(0, 250, 0, 160)
+main.Position = UDim2.new(0.05, 0, 0.5, -80)
+main.BackgroundColor3 = Color3.fromRGB(20,20,20)
 main.BackgroundTransparency = 0.13
 main.BorderSizePixel = 0
 main.Active = true
@@ -25,93 +29,128 @@ shadow.Size = UDim2.new(1,24,1,24)
 shadow.Position = UDim2.new(0,-12,0,-12)
 shadow.BackgroundTransparency = 1
 shadow.Image = "rbxassetid://1316045217"
-shadow.ImageTransparency = 0.65
+shadow.ImageTransparency = 0.68
 
 local corner = Instance.new("UICorner", main)
-corner.CornerRadius = UDim.new(0, 22)
+corner.CornerRadius = UDim.new(0, 15)
 
 local title = Instance.new("TextLabel", main)
-title.Size = UDim2.new(1, -36, 0, 38)
-title.Position = UDim2.new(0, 18, 0, 6)
+title.Size = UDim2.new(1, -35, 0, 36)
+title.Position = UDim2.new(0, 12, 0, 6)
 title.BackgroundTransparency = 1
-title.Text = "MENU"
-title.Font = Enum.Font.FredokaOne
-title.TextSize = 28
+title.Text = "Aimbot & ESP Menu"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 22
 title.TextColor3 = Color3.fromRGB(255,255,255)
 title.TextStrokeTransparency = 0.7
 title.TextXAlignment = Enum.TextXAlignment.Left
 
-local icon = Instance.new("ImageLabel", main)
-icon.Size = UDim2.new(0,32,0,32)
-icon.Position = UDim2.new(0, -8, 0, 4)
-icon.BackgroundTransparency = 1
-icon.Image = "rbxassetid://7734068321"
-icon.ImageColor3 = Color3.fromRGB(93,156,236)
-
--- "made by 847" neon animasyonlu
+-- made by 847 küçük neon yazı
 local madeby = Instance.new("TextLabel", main)
-madeby.Size = UDim2.new(1, -24, 0, 22)
-madeby.Position = UDim2.new(0, 12, 1, -28)
+madeby.Size = UDim2.new(1, -20, 0, 17)
+madeby.Position = UDim2.new(0, 10, 1, -20)
 madeby.BackgroundTransparency = 1
 madeby.Text = "made by 847"
-madeby.Font = Enum.Font.FredokaOne
-madeby.TextSize = 17
+madeby.Font = Enum.Font.GothamSemibold
+madeby.TextSize = 14
 madeby.TextColor3 = Color3.fromRGB(255,255,255)
-madeby.TextStrokeTransparency = 0.35
+madeby.TextStrokeTransparency = 0.4
 
 spawn(function()
     while true do
-        for i=0.35,0.1,-0.01 do
+        for i=0.4,0.1,-0.01 do
             madeby.TextStrokeTransparency = i
             wait(0.03)
         end
-        for i=0.1,0.35,0.01 do
+        for i=0.1,0.4,0.01 do
             madeby.TextStrokeTransparency = i
             wait(0.03)
         end
     end
 end)
 
-local toggleButton = Instance.new("ImageButton", main)
-toggleButton.Size = UDim2.new(0, 32, 0, 32)
-toggleButton.Position = UDim2.new(1, -40, 0, 4)
-toggleButton.BackgroundTransparency = 1
-toggleButton.Image = "rbxassetid://6035047389"
-toggleButton.ImageColor3 = Color3.fromRGB(180,220,255)
+-- Küçült/büyüt ( - butonu )
+local minimizeBtn = Instance.new("TextButton", main)
+minimizeBtn.Size = UDim2.new(0, 28, 0, 28)
+minimizeBtn.Position = UDim2.new(1, -34, 0, 4)
+minimizeBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
+minimizeBtn.Text = "-"
+minimizeBtn.Font = Enum.Font.GothamBold
+minimizeBtn.TextColor3 = Color3.fromRGB(255,255,255)
+minimizeBtn.TextSize = 22
+local minCorner = Instance.new("UICorner", minimizeBtn)
+minCorner.CornerRadius = UDim.new(1,0)
 
--- Otomatik Farm Butonu
-local farmBtn = Instance.new("TextButton", main)
-farmBtn.Size = UDim2.new(0.8,0,0,38)
-farmBtn.Position = UDim2.new(0.1,0,0.48,0)
-farmBtn.BackgroundColor3 = Color3.fromRGB(57,170,225)
-farmBtn.BackgroundTransparency = 0.12
-farmBtn.Text = "Otomatik Farm: KAPALI"
-farmBtn.Font = Enum.Font.FredokaOne
-farmBtn.TextSize = 20
-farmBtn.TextColor3 = Color3.fromRGB(255,255,255)
-local farmBtnCorner = Instance.new("UICorner",farmBtn)
-farmBtnCorner.CornerRadius = UDim.new(0,14)
-
--- Menü Aç/Kapat Animasyonu
+-- Menü küçült/büyüt animasyonu
 local menuOpen = true
-toggleButton.MouseButton1Click:Connect(function()
+minimizeBtn.MouseButton1Click:Connect(function()
     menuOpen = not menuOpen
     if menuOpen then
-        main:TweenSize(UDim2.new(0, 220, 0, 140), "Out", "Quart", 0.25, true)
+        main:TweenSize(UDim2.new(0, 250, 0, 160), "Out", "Quart", 0.22, true)
         for _,v in pairs(main:GetChildren()) do
-            if v ~= toggleButton then v.Visible = true end
+            if v ~= minimizeBtn then v.Visible = true end
         end
-        toggleButton.Image = "rbxassetid://6035047389"
+        minimizeBtn.Text = "-"
     else
-        main:TweenSize(UDim2.new(0, 60, 0, 45), "Out", "Quart", 0.25, true)
+        main:TweenSize(UDim2.new(0, 60, 0, 38), "Out", "Quart", 0.22, true)
         for _,v in pairs(main:GetChildren()) do
-            if v ~= toggleButton and v~=shadow then v.Visible = false end
+            if v ~= minimizeBtn and v~=shadow then v.Visible = false end
         end
-        toggleButton.Image = "rbxassetid://6031094678"
+        minimizeBtn.Text = "+"
     end
 end)
 
--- Mobil/PC Sürükleme Desteği
+-- Aimbot Butonu
+local aimbotBtn = Instance.new("TextButton", main)
+aimbotBtn.Size = UDim2.new(0.8,0,0,34)
+aimbotBtn.Position = UDim2.new(0.1,0,0.38,0)
+aimbotBtn.BackgroundColor3 = Color3.fromRGB(40,130,220)
+aimbotBtn.BackgroundTransparency = 0.12
+aimbotBtn.Text = "Aimbot: OFF"
+aimbotBtn.Font = Enum.Font.GothamBold
+aimbotBtn.TextSize = 18
+aimbotBtn.TextColor3 = Color3.fromRGB(255,255,255)
+local aimBtnCorner = Instance.new("UICorner",aimbotBtn)
+aimBtnCorner.CornerRadius = UDim.new(0,12)
+
+local aimbotActive = false
+aimbotBtn.MouseButton1Click:Connect(function()
+    aimbotActive = not aimbotActive
+    if aimbotActive then
+        aimbotBtn.Text = "Aimbot: ON"
+        aimbotBtn.BackgroundColor3 = Color3.fromRGB(60,180,95)
+    else
+        aimbotBtn.Text = "Aimbot: OFF"
+        aimbotBtn.BackgroundColor3 = Color3.fromRGB(40,130,220)
+    end
+end)
+
+-- ESP Butonu
+local espBtn = Instance.new("TextButton", main)
+espBtn.Size = UDim2.new(0.8,0,0,34)
+espBtn.Position = UDim2.new(0.1,0,0.62,0)
+espBtn.BackgroundColor3 = Color3.fromRGB(200,80,90)
+espBtn.BackgroundTransparency = 0.12
+espBtn.Text = "ESP: OFF"
+espBtn.Font = Enum.Font.GothamBold
+espBtn.TextSize = 18
+espBtn.TextColor3 = Color3.fromRGB(255,255,255)
+local espBtnCorner = Instance.new("UICorner",espBtn)
+espBtnCorner.CornerRadius = UDim.new(0,12)
+
+local espActive = false
+espBtn.MouseButton1Click:Connect(function()
+    espActive = not espActive
+    if espActive then
+        espBtn.Text = "ESP: ON"
+        espBtn.BackgroundColor3 = Color3.fromRGB(230,130,110)
+    else
+        espBtn.Text = "ESP: OFF"
+        espBtn.BackgroundColor3 = Color3.fromRGB(200,80,90)
+    end
+end)
+
+-- Sürükleme Mobil/PC
 local dragging = false
 local dragStart, startPos
 main.InputBegan:Connect(function(input)
@@ -134,63 +173,104 @@ main.InputChanged:Connect(function(input)
     end
 end)
 
--- === SADECE YÜRÜYEREK COIN AUTO FARM ===
-local farming = false
+--=== UNIVERSAL AIMBOT ===--
+-- En yakın oyuncunun HumanoidRootPart'ına nişan alacak (Tool ile ateş etme)
+function getClosestPlayer()
+    local closest, minDist = nil, math.huge
+    for _,plr in ipairs(game.Players:GetPlayers()) do
+        if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChildOfClass("Humanoid") and plr.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+            local pos = camera:WorldToViewportPoint(plr.Character.HumanoidRootPart.Position)
+            local screenDist = (Vector2.new(pos.X,pos.Y)-Vector2.new(camera.ViewportSize.X/2,camera.ViewportSize.Y/2)).Magnitude
+            if screenDist < minDist then
+                minDist = screenDist
+                closest = plr
+            end
+        end
+    end
+    return closest
+end
 
-farmBtn.MouseButton1Click:Connect(function()
-    farming = not farming
-    if farming then
-        farmBtn.Text = "Otomatik Farm: AÇIK"
-        farmBtn.BackgroundColor3 = Color3.fromRGB(50,200,110)
-    else
-        farmBtn.Text = "Otomatik Farm: KAPALI"
-        farmBtn.BackgroundColor3 = Color3.fromRGB(57,170,225)
+function shootAt(target)
+    -- Silahı (Tool) bul
+    local char = player.Character
+    if not char then return end
+    local tool = char:FindFirstChildOfClass("Tool")
+    if not tool then return end
+    -- Tool'da Handle varsa, mermiyi yönlendir
+    if tool:FindFirstChild("Handle") then
+        -- Bazı oyunlarda tool:Activate() ile ateş edilir
+        tool:Activate()
+    end
+    -- Kamera/Mouse yönünü ayarla (bazı oyunlarda yeterli!)
+    if target and target.Character and target.Character:FindFirstChild("HumanoidRootPart") then
+        -- Bazı oyunlarda sadece mouse position yeterli
+        mouse.Target = target.Character.HumanoidRootPart
+        -- Kamera bakışını ayarla (bazı oyunlarda geçerli)
+        camera.CFrame = CFrame.new(camera.CFrame.Position, target.Character.HumanoidRootPart.Position)
+    end
+end
+
+-- Ateş event (Mobil: ekrana tıkla, PC: Mouse1)
+local function onFire()
+    if not aimbotActive then return end
+    local target = getClosestPlayer()
+    if target then
+        shootAt(target)
+    end
+end
+
+-- Mobil ve PC için ateş event
+uis.InputBegan:Connect(function(input, gp)
+    if gp then return end
+    -- Mobil: ekrana dokunma, PC: MouseButton1
+    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+        onFire()
     end
 end)
 
--- Coin isimlerini buradan düzenleyebilirsin!
-local coinNames = {"Coin", "Coin_Server", "Collectible"}
-
-function findCoins()
-    local coins = {}
-    for _, isim in ipairs(coinNames) do
-        for _, obj in ipairs(ws:GetDescendants()) do
-            if obj:IsA("BasePart") and obj.Name == isim then
-                table.insert(coins, obj)
-            end
-        end
+--=== ESP ===--
+-- Basit kutu ESP (BoxDrawing yerine BillboardGui kullanılıyor, tüm oyunlarda çalışır)
+local espObjects = {}
+function clearESP()
+    for _,obj in pairs(espObjects) do
+        if obj and obj.Parent then obj:Destroy() end
     end
-    return coins
+    espObjects = {}
 end
 
-function walkTo(pos)
-    local char = player.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    local humanoid = char:FindFirstChildWhichIsA("Humanoid")
-    if not hrp or not humanoid then return end
-    local path = PathfindingService:CreatePath({
-        AgentRadius = 2,
-        AgentHeight = 5,
-        AgentCanJump = true,
-        AgentJumpHeight = 7,
-        AgentMaxSlope = 45,
-        })
-    path:ComputeAsync(hrp.Position, pos)
-    if path.Status == Enum.PathStatus.Success then
-        path:MoveTo(char)
-        path.TraverserFinished:Wait()
+function updateESP()
+    clearESP()
+    if not espActive then return end
+    for _,plr in ipairs(game.Players:GetPlayers()) do
+        if plr ~= player and plr.Character and plr.Character:FindFirstChild("HumanoidRootPart") and plr.Character:FindFirstChildOfClass("Humanoid") and plr.Character:FindFirstChildOfClass("Humanoid").Health > 0 then
+            local bb = Instance.new("BillboardGui")
+            bb.Adornee = plr.Character.HumanoidRootPart
+            bb.Size = UDim2.new(2,0,2.5,0)
+            bb.AlwaysOnTop = true
+            bb.StudsOffset = Vector3.new(0,1.5,0)
+            bb.Parent = plr.Character
+
+            local box = Instance.new("Frame", bb)
+            box.Size = UDim2.new(1,0,1,0)
+            box.BackgroundTransparency = 1
+            box.BorderSizePixel = 2
+            box.BorderColor3 = Color3.fromRGB(255,50,50)
+            box.BackgroundColor3 = Color3.fromRGB(0,0,0)
+            table.insert(espObjects, bb)
+        end
     end
 end
 
-spawn(function()
-    while true do
-        if farming then
-            local coins = findCoins()
-            if #coins > 0 then
-                walkTo(coins[1].Position)
-            end
-        end
-        wait(0.5)
+-- ESP sürekli güncellensin
+runService.RenderStepped:Connect(function()
+    if espActive then
+        updateESP()
+    else
+        clearESP()
     end
+end)
+
+-- Temizle (oyuncu ayrılırsa)
+game.Players.PlayerRemoving:Connect(function()
+    clearESP()
 end)
