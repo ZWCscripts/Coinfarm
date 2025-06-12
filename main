@@ -1,65 +1,82 @@
--- Otomatik Coin Toplama (Direct Remote Trigger, Menü, Şık Tasarım)
+--[[
+Kusursuz Coin Farm + Şık Siyah Menü (made by 847 neon beyaz)
+LocalScript olarak StarterPlayerScripts veya StarterGui'ya ekleyin.
+]]
+
 local player = game.Players.LocalPlayer
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ws = game:GetService("Workspace")
+local runService = game:GetService("RunService")
+local uis = game:GetService("UserInputService")
 
--- RemoteEvent referansı
-local CoinCollected = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Gameplay"):WaitForChild("CoinCollected")
-
--- Menü GUI
+-- === Menü GUI ===
 local gui = Instance.new("ScreenGui")
-gui.Name = "CoinAutoFarmGUI"
+gui.Name = "CoinFarmGUI847"
 gui.Parent = player:WaitForChild("PlayerGui")
 gui.ResetOnSpawn = false
 
 local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 250, 0, 140)
-frame.Position = UDim2.new(0.5, -125, 0.65, 0)
-frame.BackgroundTransparency = 0.32
-frame.BackgroundColor3 = Color3.fromRGB(60, 90, 180)
+frame.Size = UDim2.new(0, 270, 0, 150)
+frame.Position = UDim2.new(0.5, -135, 0.7, 0)
+frame.BackgroundTransparency = 0.13
+frame.BackgroundColor3 = Color3.fromRGB(12,12,12)
 frame.BorderSizePixel = 0
 frame.Active = true
 frame.Draggable = true
 frame.Parent = gui
 
 local corner = Instance.new("UICorner",frame)
-corner.CornerRadius = UDim.new(0, 18)
+corner.CornerRadius = UDim.new(0, 12)
 
-local baslik = Instance.new("TextLabel", frame)
-baslik.Size = UDim2.new(1,0,0,30)
-baslik.Position = UDim2.new(0,0,0,0)
-baslik.BackgroundTransparency = 1
-baslik.Text = "Coin Toplama Menüsü"
-baslik.Font = Enum.Font.GothamBold
-baslik.TextSize = 20
-baslik.TextColor3 = Color3.fromRGB(255,255,80)
+local header = Instance.new("Frame", frame)
+header.Size = UDim2.new(1,0,0,32)
+header.Position = UDim2.new(0,0,0,0)
+header.BackgroundColor3 = Color3.fromRGB(22,22,22)
+header.BorderSizePixel = 0
+local headerCorner = Instance.new("UICorner",header)
+headerCorner.CornerRadius = UDim.new(0,12)
 
+local title = Instance.new("TextLabel", header)
+title.Size = UDim2.new(1,0,1,0)
+title.BackgroundTransparency = 1
+title.Text = "Coin Farm Menüsü"
+title.Font = Enum.Font.GothamBold
+title.TextSize = 20
+title.TextColor3 = Color3.fromRGB(255,255,255)
+
+-- Neon beyaz "made by 847" (parlak efekt)
 local madeBy = Instance.new("TextLabel", frame)
-madeBy.Size = UDim2.new(1,0,0,22)
-madeBy.Position = UDim2.new(0,0,1,-24)
+madeBy.Size = UDim2.new(1,0,0,24)
+madeBy.Position = UDim2.new(0,0,1,-26)
 madeBy.BackgroundTransparency = 1
 madeBy.Text = "made by 847"
 madeBy.Font = Enum.Font.GothamBlack
 madeBy.TextSize = 18
-madeBy.TextStrokeTransparency = 0.5
-madeBy.TextColor3 = Color3.fromRGB(255,0,255)
+madeBy.TextColor3 = Color3.fromRGB(255,255,255)
+madeBy.TextStrokeTransparency = 0.2
+madeBy.TextStrokeColor3 = Color3.fromRGB(255,255,255)
 
+-- Neon parlama efekti
 spawn(function()
     while true do
-        for h=0,1,0.01 do
-            madeBy.TextColor3 = Color3.fromHSV(h,1,1)
-            wait(0.015)
+        for i=0.2,0.05,-0.01 do
+            madeBy.TextStrokeTransparency = i
+            wait(0.06)
+        end
+        for i=0.05,0.2,0.01 do
+            madeBy.TextStrokeTransparency = i
+            wait(0.06)
         end
     end
 end)
 
-local acKapa = Instance.new("TextButton", frame)
-acKapa.Size = UDim2.new(0,30,0,30)
-acKapa.Position = UDim2.new(1,-35,0,5)
-acKapa.BackgroundColor3 = Color3.fromRGB(255,255,255)
-acKapa.BackgroundTransparency = 0.15
+-- Menü aç/kapat (üst sağda)
+local acKapa = Instance.new("TextButton", header)
+acKapa.Size = UDim2.new(0,28,0,28)
+acKapa.Position = UDim2.new(1,-34,0,2)
+acKapa.BackgroundColor3 = Color3.fromRGB(34,34,34)
 acKapa.Text = "-"
 acKapa.Font = Enum.Font.GothamBold
-acKapa.TextColor3 = Color3.fromRGB(60, 90, 180)
+acKapa.TextColor3 = Color3.fromRGB(180,180,180)
 acKapa.TextSize = 20
 local acKapaCorner = Instance.new("UICorner",acKapa)
 acKapaCorner.CornerRadius = UDim.new(1,0)
@@ -68,30 +85,35 @@ local menuAcik = true
 acKapa.MouseButton1Click:Connect(function()
     menuAcik = not menuAcik
     for _,v in pairs(frame:GetChildren()) do
-        if v ~= acKapa and v:IsA("GuiObject") then v.Visible = menuAcik end
+        if v ~= header and v ~= madeBy then
+            v.Visible = menuAcik
+        end
+    end
+    for _,v in pairs(header:GetChildren()) do
+        if v ~= acKapa then
+            v.Visible = menuAcik
+        end
     end
     acKapa.Text = menuAcik and "-" or "+"
 end)
 
 -- Aç/kapat butonu
 local toggle = Instance.new("TextButton", frame)
-toggle.Size = UDim2.new(0.8,0,0,40)
+toggle.Size = UDim2.new(0.8,0,0,44)
 toggle.Position = UDim2.new(0.1,0,0.38,0)
-toggle.BackgroundColor3 = Color3.fromRGB(80,255,110)
-toggle.BackgroundTransparency = 0.08
+toggle.BackgroundColor3 = Color3.fromRGB(30,30,30)
+toggle.BackgroundTransparency = 0.1
 toggle.Text = "Oto Coin: Kapalı"
 toggle.Font = Enum.Font.GothamBold
 toggle.TextSize = 20
-toggle.TextColor3 = Color3.fromRGB(0,0,0)
+toggle.TextColor3 = Color3.fromRGB(255,255,255)
 local toggleCorner = Instance.new("UICorner",toggle)
 toggleCorner.CornerRadius = UDim.new(0,14)
 
--- Mobil sürükleme desteği
-local UIS = game:GetService("UserInputService")
-local dragging = false
-local dragStart, startPos
+-- Menü sürükleme (mobil uyumlu)
+local dragging, dragStart, startPos
 frame.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragging = true
         dragStart = input.Position
         startPos = frame.Position
@@ -101,7 +123,7 @@ frame.InputBegan:Connect(function(input)
     end
 end)
 frame.InputChanged:Connect(function(input)
-    if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
+    if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStart
         frame.Position = UDim2.new(
             startPos.X.Scale, startPos.X.Offset + delta.X,
@@ -110,31 +132,83 @@ frame.InputChanged:Connect(function(input)
     end
 end)
 
--- Oto farm mantığı
+-- === OTO COIN LOGİĞİ ===
 local aktif = false
 toggle.MouseButton1Click:Connect(function()
     aktif = not aktif
     if aktif then
         toggle.Text = "Oto Coin: Açık"
-        toggle.BackgroundColor3 = Color3.fromRGB(10, 180, 60)
+        toggle.BackgroundColor3 = Color3.fromRGB(30,160,30)
     else
         toggle.Text = "Oto Coin: Kapalı"
-        toggle.BackgroundColor3 = Color3.fromRGB(80,255,110)
+        toggle.BackgroundColor3 = Color3.fromRGB(30,30,30)
     end
 end)
+
+-- Coin isimleri (oyuna göre değiştirebilirsin)
+local coinNames = {"Coin_Server", "Coin", "Coins", "Collectible"}
+
+function findCoins()
+    local coins = {}
+    for _,isim in ipairs(coinNames) do
+        -- Önce Workspace'te klasör mü var?
+        local folder = ws:FindFirstChild(isim)
+        if folder then
+            for _, coin in ipairs(folder:GetChildren()) do
+                if coin:IsA("BasePart") then
+                    table.insert(coins, coin)
+                end
+            end
+        end
+        -- Yoksa doğrudan Workspace'te mi?
+        for _, obj in ipairs(ws:GetChildren()) do
+            if obj.Name == isim and obj:IsA("BasePart") then
+                table.insert(coins, obj)
+            end
+        end
+    end
+    return coins
+end
+
+function safeStepToCoin(coin)
+    local char = player.Character
+    if not char then return end
+    local hrp = char:FindFirstChild("HumanoidRootPart")
+    local hum = char:FindFirstChildOfClass("Humanoid")
+    if not hrp or not hum then return end
+    -- Görünmezlik
+    for _,v in pairs(char:GetChildren()) do
+        if v:IsA("BasePart") then v.Transparency = 0.85 end
+        if v:IsA("Decal") then v.Transparency = 1 end
+    end
+    -- Hız artır
+    local eskiHiz = hum.WalkSpeed
+    hum.WalkSpeed = 45
+    -- Küçük adımlarla yaklaş
+    local steps = 14
+    local start = hrp.Position
+    local hedef = coin.Position + Vector3.new(0,2,0)
+    for i=1,steps do
+        local t = i/steps
+        hrp.CFrame = CFrame.new(start:Lerp(hedef, t))
+        wait(0.045)
+    end
+    wait(0.08)
+    -- Normale dön
+    hum.WalkSpeed = eskiHiz
+    for _,v in pairs(char:GetChildren()) do
+        if v:IsA("BasePart") then v.Transparency = 0 end
+        if v:IsA("Decal") then v.Transparency = 0 end
+    end
+end
 
 spawn(function()
     while true do
         if aktif then
-            -- Sunucudan alınan coin verileri ile aynı şekilde tetiklenir
-            firesignal(CoinCollected.OnClientEvent, 
-                "Coin",
-                3,
-                40,
-                {
-                    Value = 1
-                }
-            )
+            local coins = findCoins()
+            if #coins > 0 then
+                safeStepToCoin(coins[1])
+            end
         end
         wait(0.3)
     end
